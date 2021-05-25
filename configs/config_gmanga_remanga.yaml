@@ -1,0 +1,11 @@
+target_df:
+  path: './data/raw/remanga_catalog_full.csv'
+  name_cols: ['rus_name', 'en_name']
+  name: 'remanga'
+
+source_df:
+  path: 'data/raw/manga.csv'
+
+result:
+  path: 'data/gmanga_matched_remanga.csv'
+  hist_path: 'pics/gmanga_remanga_matches.png'

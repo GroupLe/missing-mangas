@@ -1,0 +1,11 @@
+target_df:
+  path: './data/raw/mangalib_catalog_titles.csv'
+  name_cols: ['name']
+  name: 'mangalib'
+
+source_df:
+  path: 'data/gmint_matched_remanga.csv'
+
+result:
+  path: 'data/gmint_matched_remanga_mangalib.csv'
+  hist_path: 'pics/gmint_mangalib_matches.png'

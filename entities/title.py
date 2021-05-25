@@ -1,3 +1,6 @@
+from fuzzywuzzy import fuzz
+
+
 class Title:
     def __init__(self, names: list, meta=None):
         self.names = list(set(names))
@@ -32,5 +35,36 @@ class Title:
         except:
             return None
     
+    def __repr__(self):
+        return "<Title> with names " + ', '.join(list(map(str, self.names)))
+
+
+class FuzzyTitle:
+    def __init__(self, names: list, meta=None):
+        self.names = list(set(names))
+        self.meta = meta
+
+    def __eq__(self, other):
+        for name1 in self.names:
+            for name2 in other.names:
+                if fuzz.partial_token_set_ratio(name1.lower(), name2.lower()) >= 0.95:
+                    return True
+        return False
+
+    def strong_equal_names_n(self, other):
+        max_similarity = 0
+        for name1 in self.names:
+            for name2 in other.names:
+                sim = fuzz.partial_token_set_ratio(name1.lower(), name2.lower())
+                if sim > max_similarity:
+                    max_similarity = sim
+        return max_similarity
+
+    def get_index(self):
+        try:
+            return self.meta['index']
+        except:
+            return None
+
     def __repr__(self):
         return "<Title> with names " + ', '.join(list(map(str, self.names)))
