@@ -5,6 +5,7 @@ target_df:
 
 source_df:
   path: 'data/gmint_matched_remanga.csv'
+  name_cols: ['name', 'original_name', 'eng_name']
 
 result:
   path: 'data/gmint_matched_remanga_mangalib.csv'

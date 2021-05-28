@@ -32,14 +32,15 @@ class Matcher:
         return matched
 
 
-def match_mangas(source_df, target_df, target_df_name_columns: list, target_df_name: str):
-
+def match_mangas(source_df: pd.DataFrame,
+                 target_df: pd.DataFrame,
+                 target_df_name_columns: list,
+                 target_df_name: str,
+                 source_df_name_columns: list):
     # create manga titles
-    ru_names = source_df.name.tolist()
-    an_names = source_df.original_name.tolist()
-    en_names = source_df.eng_name.tolist()
+    source_manga_names = list(source_df[source_df_name_columns].to_records(index=False))
     ids = source_df.index.tolist()
-    gtitles = [Title([ru_names[i], an_names[i], en_names[i]], meta={'index': ids[i]}) for i in range(len(ru_names))]
+    gtitles = [Title(list(source_manga_names[i]), meta={'index': ids[i]}) for i in range(len(source_manga_names))]
 
     target_manga_names = list(target_df[target_df_name_columns].to_records(index=False))
     ids = target_df.index.tolist()
@@ -77,13 +78,18 @@ if __name__ == '__main__':
     print('run with config', sys.argv[1])
     config = Hparam(sys.argv[1])
 
-    target_df = pd.read_csv(config.target_df.path)
+    try:
+        sep = config.target_df.separator
+    except:
+        sep = ','
+    target_df = pd.read_csv(config.target_df.path, sep=sep)
     source_df = pd.read_csv(config.source_df.path, sep=';')
 
     res_soure_target = match_mangas(source_df,
                                     target_df,
                                     config.target_df.name_cols,
-                                    config.target_df.name)
+                                    config.target_df.name,
+                                    config.source_df.name_cols)
     res_df = res_soure_target['source_df']
     res_df.to_csv(config.result.path, sep=';')
 

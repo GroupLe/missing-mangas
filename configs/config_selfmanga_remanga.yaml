@@ -5,6 +5,7 @@ target_df:
 
 source_df:
   path: 'data/raw/selfmanga.csv'
+  name_cols: ['name', 'original_name', 'eng_name']
 
 result:
   path: 'data/selfmanga_matched_remanga.csv'

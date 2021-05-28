@@ -1,0 +1,13 @@
+target_df:
+  path: './data/missing/mangalib_exclusive.csv'
+  name_cols: ['name']
+  name: 'mangalib'
+  separator: ';'
+
+source_df:
+  path: 'data/missing/remanga_exclusive.csv'
+  name_cols: ['rus_name', 'en_name']
+
+result:
+  path: 'data/missing/remanga_matched_mangalib.csv'
+  hist_path: 'pics/missing_gmanga_mangalib_matches.png'
