@@ -1,6 +1,6 @@
 target_df:
   path: './data/missing/mangalib_exclusive.csv'
-  name_cols: ['name']
+  name_cols: ['name', 'eng_name', 'original_name']
   name: 'mangalib'
   separator: ';'
 

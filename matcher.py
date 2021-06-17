@@ -2,34 +2,13 @@ import sys
 import pandas as pd
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-from entities import Title, FuzzyTitle
+from entities import Title, FuzzyTitle, FirstMatcher, FullMatcher
 from multiprocessing import Pool, cpu_count
 from yamlparams.utils import Hparam
 
 
-class Matcher:
-    def __init__(self, titles):
-        self.titles = titles
-
-    def find_matches(self, gtitle: FuzzyTitle) -> list:
-        eps_diff = 3  # of 100
-        matched = []
-
-        for j, mtitle in enumerate(self.titles):
-            if mtitle == gtitle:
-                matched.append(mtitle)
-
-        if len(matched) > 1:
-            # search the most similar
-            # Drop not so similar cases
-            similarities = [gtitle.strong_equal_names_n(mtitle) for mtitle in matched]
-            top_similar = max(similarities)
-            for i, sim in enumerate(similarities):
-                if abs(similarities[i] - top_similar) <= eps_diff:
-                    matched[i] = None
-
-            matched = list(filter(lambda item: item is not None, matched))
-        return matched
+TitleEnity = FuzzyTitle
+MatcherEntity = FullMatcher
 
 
 def match_mangas(source_df: pd.DataFrame,
@@ -40,11 +19,11 @@ def match_mangas(source_df: pd.DataFrame,
     # create manga titles
     source_manga_names = list(source_df[source_df_name_columns].to_records(index=False))
     ids = source_df.index.tolist()
-    gtitles = [Title(list(source_manga_names[i]), meta={'index': ids[i]}) for i in range(len(source_manga_names))]
+    gtitles = [TitleEnity(list(source_manga_names[i]), meta={'index': ids[i]}) for i in range(len(source_manga_names))]
 
     target_manga_names = list(target_df[target_df_name_columns].to_records(index=False))
     ids = target_df.index.tolist()
-    mtitles = [Title(list(target_manga_names[i]), meta={'index': ids[i]}) for i in range(len(target_manga_names))]
+    mtitles = [TitleEnity(list(target_manga_names[i]), meta={'index': ids[i]}) for i in range(len(target_manga_names))]
 
     print('source titles n:', len(gtitles))
     print('target titles n:', len(mtitles))
@@ -54,7 +33,7 @@ def match_mangas(source_df: pd.DataFrame,
 
     k = -1
     with Pool(cpu_count()-1) as pool:
-        matcher = Matcher(mtitles)
+        matcher = MatcherEntity(mtitles)
         match_res = list(tqdm(pool.imap(matcher.find_matches, gtitles[:k]), total=len(gtitles)))
 
     for gtitle, matched in tqdm(zip(gtitles[:k], match_res), total=len(gtitles)):

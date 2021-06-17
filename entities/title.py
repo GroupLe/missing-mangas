@@ -1,7 +1,20 @@
 from fuzzywuzzy import fuzz
 
 
-class Title:
+
+class TitleBase:
+    def __init__(self, names: list, **kwargs):
+        raise NotImplemented
+    
+    def __eq__(self, other):
+        raise NotImplemented
+    
+    def strong_equal_names_n(self, other):
+        raise NotImplemented
+
+
+        
+class Title(TitleBase):
     def __init__(self, names: list, meta=None):
         self.names = list(set(names))
         self.meta = meta
@@ -38,16 +51,18 @@ class Title:
     def __repr__(self):
         return "<Title> with names " + ', '.join(list(map(str, self.names)))
 
+    
 
-class FuzzyTitle:
+class FuzzyTitle(TitleBase):
     def __init__(self, names: list, meta=None):
+        names = list(filter(lambda name: isinstance(name, str), names))
         self.names = list(set(names))
         self.meta = meta
 
     def __eq__(self, other):
         for name1 in self.names:
             for name2 in other.names:
-                if fuzz.partial_token_set_ratio(name1.lower(), name2.lower()) >= 0.95:
+                if fuzz.token_sort_ratio(name1.lower(), name2.lower()) >= 75:
                     return True
         return False
 
