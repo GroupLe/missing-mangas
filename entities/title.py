@@ -71,8 +71,8 @@ class FuzzyTitle(TitleBase):
         for name1 in self.names:
             for name2 in other.names:
                 sim = fuzz.partial_token_set_ratio(name1.lower(), name2.lower())
-                if sim > max_similarity:
-                    max_similarity = sim
+                max_similarity = max(sim, max_similarity)
+                
         return max_similarity
 
     def get_index(self):
