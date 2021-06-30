@@ -1,3 +1,2 @@
-from .title import Title, FuzzyTitle
+from .title import Title, FuzzyTitle, TitleSecond
 from .matcher import FirstMatcher, FullMatcher
-
