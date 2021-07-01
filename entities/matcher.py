@@ -1,5 +1,5 @@
 from typing import List
-from .title import TitleBase
+from .simpletitle import TitleBase
 
 
 class Matcher:

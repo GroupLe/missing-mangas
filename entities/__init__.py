@@ -1,2 +1,2 @@
-from .title import Title, FuzzyTitle, TitleSecond
+from .simpletitle import SimpleTitle, FuzzyTitleOnClearStrings, CompareByLanguageTitle
 from .matcher import FirstMatcher, FullMatcher
