@@ -106,6 +106,9 @@ class FuzzyTitle(TitleBase):
         s = s.lower()
         return s
 
+    def get_difference(self, name1, name2):
+        return fuzz.token_sort_ratio(name1.lower(), name2.lower())
+
 
 class CompareByLanguageTitle(FuzzyTitle):
     def __init__(self, names: list, meta=None):
@@ -132,8 +135,7 @@ class CompareByLanguageTitle(FuzzyTitle):
         for key in self.names:
             for name1 in self.names[key]:
                 for name2 in other.names[key]:
-                    if fuzz.token_sort_ratio(name1.lower(),
-                                             name2.lower()) >= 75:
+                    if self.get_difference(name1, name2) >= 75:
                         return True
         return False
 
@@ -156,7 +158,7 @@ class FuzzyTitleOnClearStrings(FuzzyTitle):
     def __eq__(self, other):
         for name1 in self.names:
             for name2 in other.names:
-                if fuzz.token_sort_ratio(name1.lower(), name2.lower()) >= 75:
+                if self.get_difference(name1, name2) >= 75:
                     return True
         return False
 
@@ -164,8 +166,7 @@ class FuzzyTitleOnClearStrings(FuzzyTitle):
         max_similarity = 0
         for name1 in self.names:
             for name2 in other.names:
-                sim = fuzz.partial_token_set_ratio(name1.lower(),
-                                                   name2.lower())
+                sim = self.get_difference(name1, name2)
                 max_similarity = max(sim, max_similarity)
 
         return max_similarity
