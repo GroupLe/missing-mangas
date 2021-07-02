@@ -2,12 +2,13 @@ import sys
 import pandas as pd
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-from entities import SimpleTitle, FuzzyTitleOnClearStrings, FirstMatcher, FullMatcher, CompareByLanguageTitle
+from entities import CompareByLanguageFuzzyTitle, CompareByLanguageNaiveTitle,\
+    CompareJustFuzzyTitle,  CompareJustNaiveTitle,  FirstMatcher, FullMatcher
 from multiprocessing import Pool, cpu_count
 from yamlparams.utils import Hparam
 
 
-TitleEnity = CompareByLanguageTitle
+TitleEnity =  CompareJustFuzzyTitle
 MatcherEntity = FullMatcher
 
 
