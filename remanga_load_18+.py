@@ -7,18 +7,21 @@ from tqdm import tqdm
 
 def get_chapter_label(link):
     browser.get(f'https://remanga.org/manga/{link}?subpath=content')
-    chapter_label = browser.find_elements_by_xpath("//div[contains(@class, 'MuiTabs-flexContainer')]/button")[1].text
+    chapter_label = browser.find_elements_by_xpath(
+        "//div[contains(@class, 'MuiTabs-flexContainer')]/button")[1].text
     return chapter_label
 
 
 if __name__ == '__main__':
     options = webdriver.FirefoxOptions()
     options.binary_location = '/usr/bin/firefox'
-    browser = webdriver.Firefox(executable_path='./geckodriver', options=options)
+    browser = webdriver.Firefox(executable_path='./geckodriver',
+                                options=options)
 
     browser.get('https://remanga.org')
     sleep(1.0)
-    btn = browser.find_element_by_xpath("//button[@class='MuiButtonBase-root c26']")
+    btn = browser.find_element_by_xpath(
+        "//button[@class='MuiButtonBase-root c26']")
     btn.click()
 
     login, psw = open('secret.txt').splitlines()
@@ -30,7 +33,6 @@ if __name__ == '__main__':
     btn.click()
 
     sleep(0.5)
-
 
     df = pd.read_csv('./data/remanga_catalog_mangas.csv')
     links = df[df.n_chapters.isna()].dir.tolist()

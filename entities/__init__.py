@@ -1,3 +1,3 @@
-from .title import Title, FuzzyTitle
-from .matcher import FirstMatcher, FullMatcher
-
+from .titles import CompareByLanguageFuzzyTitle, CompareByLanguageNaiveTitle,\
+    CompareJustFuzzyTitle,  CompareJustNaiveTitle
+from .matchers import FirstMatcher, FullMatcher

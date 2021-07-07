@@ -1,19 +1,19 @@
 from typing import List
-from .title import TitleBase
-
+from .titles import TitleBase
 
 
 class Matcher:
     def __init__(self, titles: List[TitleBase, ]):
         raise NotImplemented
-        
+
     def find_matches(self, gtitle: TitleBase) -> list:
         raise NotImplemented
-        
 
 
 class FullMatcher(Matcher):
-    """class with multithread access to data and public method for comparing titles"""
+    """class with multithread access to data and public method
+                                          for comparing titles"""
+
     def __init__(self, titles: List[TitleBase, ]):
         self.titles = titles
 
@@ -28,7 +28,8 @@ class FullMatcher(Matcher):
         if len(matched) > 1:
             # search the most similar
             # Drop not so similar cases
-            similarities = [gtitle.strong_equal_names_n(mtitle) for mtitle in matched]
+            similarities = [gtitle.strong_equal_names_n(mtitle)
+                            for mtitle in matched]
             top_similar = max(similarities)
             for i, sim in enumerate(similarities):
                 if abs(similarities[i] - top_similar) <= eps_diff:
@@ -38,9 +39,10 @@ class FullMatcher(Matcher):
         return matched
 
 
-
 class FirstMatcher(Matcher):
-    """class with multithread access to data and public method for comparing titles"""
+    """class with multithread access to data
+       and public method for comparing titles"""
+
     def __init__(self, titles):
         self.titles = titles
 

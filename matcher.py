@@ -2,12 +2,13 @@ import sys
 import pandas as pd
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-from entities import Title, FuzzyTitle, FirstMatcher, FullMatcher
+from entities import CompareByLanguageFuzzyTitle, CompareByLanguageNaiveTitle,\
+    CompareJustFuzzyTitle,  CompareJustNaiveTitle,  FirstMatcher, FullMatcher
 from multiprocessing import Pool, cpu_count
 from yamlparams.utils import Hparam
 
 
-TitleEnity = FuzzyTitle
+TitleEnity =  CompareJustFuzzyTitle
 MatcherEntity = FullMatcher
 
 
@@ -17,13 +18,21 @@ def match_mangas(source_df: pd.DataFrame,
                  target_df_name: str,
                  source_df_name_columns: list):
     # create manga titles
-    source_manga_names = list(source_df[source_df_name_columns].to_records(index=False))
+    source_manga_names = list(
+        source_df[source_df_name_columns].to_records(index=False))
     ids = source_df.index.tolist()
-    gtitles = [TitleEnity(list(source_manga_names[i]), meta={'index': ids[i]}) for i in range(len(source_manga_names))]
 
-    target_manga_names = list(target_df[target_df_name_columns].to_records(index=False))
+    gtitles = [TitleEnity(list(source_manga_names[i]),
+                          meta={'index': ids[i]})
+               for i in range(len(source_manga_names))]
+
+    target_manga_names = list(
+        target_df[target_df_name_columns].to_records(index=False))
+
     ids = target_df.index.tolist()
-    mtitles = [TitleEnity(list(target_manga_names[i]), meta={'index': ids[i]}) for i in range(len(target_manga_names))]
+    mtitles = [TitleEnity(list(target_manga_names[i]),
+                          meta={'index': ids[i]})
+               for i in range(len(target_manga_names))]
 
     print('source titles n:', len(gtitles))
     print('target titles n:', len(mtitles))
@@ -34,9 +43,11 @@ def match_mangas(source_df: pd.DataFrame,
     k = -1
     with Pool(cpu_count()-1) as pool:
         matcher = MatcherEntity(mtitles)
-        match_res = list(tqdm(pool.imap(matcher.find_matches, gtitles[:k]), total=len(gtitles)))
+        match_res = list(tqdm(pool.imap(matcher.find_matches,
+                                        gtitles[:k]), total=len(gtitles)))
 
-    for gtitle, matched in tqdm(zip(gtitles[:k], match_res), total=len(gtitles)):
+    for gtitle, matched in tqdm(zip(gtitles[:k],
+                                    match_res), total=len(gtitles)):
         i = gtitle.get_index()
 
         if len(matched) == 1:
@@ -53,13 +64,13 @@ def match_mangas(source_df: pd.DataFrame,
             'source_df': source_df,
             'matched': matched}
 
+
 if __name__ == '__main__':
     print('run with config', sys.argv[1])
     config = Hparam(sys.argv[1])
-
     try:
         sep = config.target_df.separator
-    except:
+    except KeyError:
         sep = ','
     target_df = pd.read_csv(config.target_df.path, sep=sep)
     source_df = pd.read_csv(config.source_df.path, sep=';')
