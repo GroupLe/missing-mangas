@@ -2,9 +2,6 @@ from fuzzywuzzy import fuzz
 from collections import defaultdict
 
 
-LIMIT = 0.95
-
-
 class TitleBase:
     def __init__(self, names: list, **kwargs):
         raise NotImplemented
@@ -45,7 +42,7 @@ class CompareByLanguageTitle(TitleBase):
         for lang in self.names.keys():
             for name1 in self.names[lang]:
                 for name2 in other.names[lang]:
-                    if self._compare_strings(name1, name2) >= LIMIT:
+                    if self._compare_strings(name1, name2):
                         return True
         return False
 
@@ -83,7 +80,7 @@ class CompareJustTitle(TitleBase):
     def __eq__(self, other):
         for name1 in self.names:
             for name2 in other.names:
-                if self._compare_strings(name1, name2) >= LIMIT:
+                if self._compare_strings(name1, name2):
                     return True
         return False
 
