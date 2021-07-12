@@ -26,7 +26,7 @@ class CompareByLanguageTitle(TitleBase):
             clear_elem = self._clear(elem)
             self.names[self.get_type_name(clear_elem)].append(clear_elem)
 
-    def get_type_name(self, name):
+    def get_type_name(self, name: str) -> str:
         ord_of_symbols = [ord(x) for x in filter(str.isalpha, name)]
         if len(ord_of_symbols) == 0:
             return None
@@ -38,7 +38,7 @@ class CompareByLanguageTitle(TitleBase):
         else:
             return "other"
 
-    def __eq__(self, other):
+    def __eq__(self, other: TitleBase) -> bool:
         for lang in self.names.keys():
             for name1 in self.names[lang]:
                 for name2 in other.names[lang]:
@@ -46,7 +46,7 @@ class CompareByLanguageTitle(TitleBase):
                         return True
         return False
 
-    def strong_equal_names_n(self, other):
+    def strong_equal_names_n(self, other: TitleBase) -> int:
         eqs = 0
         for key in self.names:
             for name1 in self.names[key]:
@@ -55,7 +55,7 @@ class CompareByLanguageTitle(TitleBase):
                         eqs += 1
         return eqs
 
-    def _clear(self, s):
+    def _clear(self, s: str) -> str:
         s = ''.join(list(filter(lambda c: c.isalpha() or c.isdigit() or c == ' ', s)))
         s = s.lower()
         return s
@@ -72,19 +72,19 @@ class CompareJustTitle(TitleBase):
         self.names = list(map(self._clear, set(str(name) for name in names)))
         self.meta = meta
 
-    def _clear(self, s):
+    def _clear(self, s:str) -> str:
         s = ''.join(list(filter(lambda c: c.isalpha() or c.isdigit() or c == ' ', s)))
         s = s.lower()
         return s
 
-    def __eq__(self, other):
+    def __eq__(self, other: TitleBase) -> bool:
         for name1 in self.names:
             for name2 in other.names:
                 if self._compare_strings(name1, name2):
                     return True
         return False
 
-    def strong_equal_names_n(self, other):
+    def strong_equal_names_n(self, other) -> int:
         eqs = 0
         for name1 in self.names:
             for name2 in other.names:
@@ -103,12 +103,12 @@ class CompareJustTitle(TitleBase):
 
 
 class AbstractFuzzyComparableTitle:
-    def _compare_strings(self, s1, s2):
+    def _compare_strings(self, s1: str, s2: str) -> float:
         return fuzz.token_sort_ratio(s1.lower(), s2.lower())
 
 
 class AbstractNaiveComparableTitle:
-    def _compare_strings(self, s1, s2):
+    def _compare_strings(self, s1: str, s2: str) -> float:
         return self._clear(s1.lower()) == self._clear(s2.lower())
 
 
