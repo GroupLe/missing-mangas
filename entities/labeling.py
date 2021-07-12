@@ -10,13 +10,15 @@ class DataMatcher:
 
     def match_labels_by_hands(self, iterations=100):
         count_iterations = 0
-        for line in self.data.iloc[self.last_matched:].iterrows():
-            if count_iterations == iterations:
+        columns = list(self.data.columns)
+        for index, line in enumerate(
+                self.data.iloc[self.last_matched:].to_records(index=False)):
+            if index == iterations:
+                self.last_matched += iterations
                 break
-            print(line)
-            print("Now is - " + str(count_iterations) + " iteration. "
-                  + "You need " + str(iterations - count_iterations) + " more")
-
+            for pair in list(zip(columns, list(line))):
+                print(" : ".join(str(elem) for elem in pair))
+            print(f"{index + 1}/{iterations}")
             while True:
                 try:
                     user_opinion = int(input())
@@ -26,16 +28,9 @@ class DataMatcher:
                         break
                 except ValueError:
                     print("Incorrect input, you should enter 1 or 0")
-
             self.user_verdict.append(user_opinion)
-            count_iterations += 1
-            os.system("cls")
-
-        self.last_matched += count_iterations
 
     def save_user_verdict(self, name_of_new_column: str, path: str):
         new_data = self.data.iloc[:self.last_matched]
         new_data.loc[:self.last_matched, name_of_new_column] = self.user_verdict
         new_data.to_csv(path)
-
-
