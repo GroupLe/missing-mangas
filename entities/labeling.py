@@ -12,7 +12,7 @@ class DataMatcher:
         count_iterations = 0
         columns = list(self.data.columns)
         for index, line in enumerate(
-                self.data.iloc[self.last_matched:].to_records(index=False)):
+                self.data.to_records(index=False)[self.last_matched:]):
             if index == iterations:
                 self.last_matched += iterations
                 break
