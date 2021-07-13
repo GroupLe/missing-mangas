@@ -4,7 +4,7 @@ from typing import Callable, Tuple, Union
 import pandas as pd
 from catboost import CatBoostClassifier
 
-model = CatBoostClassifier().load_model("data/model_data/cat-boost-weights.cbm",)
+model = CatBoostClassifier().load_model("model_data/cat-boost-weights.cbm",)
 
 
 class TitleBase:
