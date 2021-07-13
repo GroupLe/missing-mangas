@@ -1,3 +1,3 @@
 from .titles import CompareByLanguageFuzzyTitle, CompareByLanguageNaiveTitle,\
-    CompareJustFuzzyTitle,  CompareJustNaiveTitle
+    CompareJustFuzzyTitle,  CompareJustNaiveTitle, CompareByLanguageCatBoostTitle
 from .matchers import FirstMatcher, FullMatcher
