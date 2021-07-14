@@ -1,5 +1,10 @@
 from fuzzywuzzy import fuzz
 from collections import defaultdict
+from typing import Callable, Tuple, Union
+import pandas as pd
+from catboost import CatBoostClassifier
+
+model = CatBoostClassifier().load_model("model_data/cat-boost-weights.cbm",)
 
 
 class TitleBase:
@@ -18,7 +23,7 @@ class TitleBase:
 
 class CompareByLanguageTitle(TitleBase):
 
-    def __init__(self, names: list, meta = None):
+    def __init__(self, names: list, meta=None):
         names = list(filter(lambda name: isinstance(name, str), names))
         self.meta = meta
         self.names = defaultdict(list)
@@ -128,3 +133,36 @@ class CompareJustNaiveTitle(AbstractNaiveComparableTitle, CompareJustTitle):
     pass
 
 
+class CompareByLanguageCatBoostTitle(CompareByLanguageTitle):
+    def __init__(self, names: list, path="data/model_data/weights.cbm", meta=None):
+        names = list(filter(lambda name: isinstance(name, str), names))
+        self.meta = meta
+        self.names = defaultdict(list)
+        for elem in names:
+            clear_elem = self._clear(elem)
+            self.names[self.get_type_name(clear_elem)].append(clear_elem)
+        # self.model = CatBoostClassifier().load_model(path)
+
+    def _compare_strings(self, s1: str, s2: str) -> float:
+        return [fuzz.ratio(s1, s2), self.is_equal(s1, s2), self.chars_jaccard(s1, s2)]
+
+    def __eq__(self, other: TitleBase) -> bool:
+        if len(self.names["russian"]) < 1 or len(self.names["english"]) < 1 \
+                or len(other.names["russian"]) < 1 or len(other.names["english"]) < 1:
+            return 0
+        r_name_1, en_name_1 = self.names["russian"][0], \
+                              self.names["english"][0]
+        r_name_2, en_name_2 = other.names["russian"][0], \
+                              other.names["english"][0]
+
+        return model.predict([*self._compare_strings(r_name_1, r_name_2),
+                                   *self._compare_strings(en_name_1, en_name_2)])
+
+    @staticmethod
+    def is_equal(s1, s2) -> int:
+        return int(s1 == s2)
+
+    @staticmethod
+    def chars_jaccard(s1, s2) -> float:
+        s1, s2 = set(s1), set(s2)
+        return len(s1.intersection(s2)) / len(s1.union(s2))
