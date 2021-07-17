@@ -1,14 +1,12 @@
 from fuzzywuzzy import fuzz
 from collections import defaultdict
-from typing import Callable, Tuple, Union
+from typing import Callable, Tuple, Union, List
 import pandas as pd
 from catboost import CatBoostClassifier
 
-model = CatBoostClassifier().load_model("model_data/cat-boost-weights.cbm",)
-
 
 class TitleBase:
-    def __init__(self, names: list, **kwargs):
+    def __init__(self, names: list, meta=None, **kwargs):
         raise NotImplemented
 
     def _compare_strings(self, s1: str, s2: str) -> bool:
@@ -19,6 +17,17 @@ class TitleBase:
 
     def strong_equal_names_n(self, other):
         raise NotImplemented
+
+    def _clear(self, s: str) -> str:
+        s = ''.join(list(filter(lambda c: c.isalpha() or c.isdigit() or c == ' ', s)))
+        s = s.lower()
+        return s
+
+    def get_index(self):
+        try:
+            return self.meta['index']
+        except (KeyError, AttributeError):
+            return None
 
 
 class CompareByLanguageTitle(TitleBase):
@@ -60,17 +69,6 @@ class CompareByLanguageTitle(TitleBase):
                         eqs += 1
         return eqs
 
-    def _clear(self, s: str) -> str:
-        s = ''.join(list(filter(lambda c: c.isalpha() or c.isdigit() or c == ' ', s)))
-        s = s.lower()
-        return s
-
-    def get_index(self):
-        try:
-            return self.meta['index']
-        except:
-            return None
-
 
 class CompareJustTitle(TitleBase):
     def __init__(self, names: list, meta=None):
@@ -85,7 +83,7 @@ class CompareJustTitle(TitleBase):
     def __eq__(self, other: TitleBase) -> bool:
         for name1 in self.names:
             for name2 in other.names:
-                if self._compare_strings(name1, name2):
+                if self._compare_strings(name1, name2) > 85:
                     return True
         return False
 
@@ -93,7 +91,7 @@ class CompareJustTitle(TitleBase):
         eqs = 0
         for name1 in self.names:
             for name2 in other.names:
-                if self._compare_strings(name1, name2):
+                if self._compare_strings(name1, name2) > 85:
                     eqs += 1
         return eqs
 
@@ -134,29 +132,27 @@ class CompareJustNaiveTitle(AbstractNaiveComparableTitle, CompareJustTitle):
 
 
 class CompareByLanguageCatBoostTitle(CompareByLanguageTitle):
-    def __init__(self, names: list, path="data/model_data/weights.cbm", meta=None):
-        names = list(filter(lambda name: isinstance(name, str), names))
-        self.meta = meta
-        self.names = defaultdict(list)
-        for elem in names:
-            clear_elem = self._clear(elem)
-            self.names[self.get_type_name(clear_elem)].append(clear_elem)
-        # self.model = CatBoostClassifier().load_model(path)
+    _model = CatBoostClassifier().load_model("model_data/cat-boost-weights_depth_3.cbm", )
 
-    def _compare_strings(self, s1: str, s2: str) -> float:
-        return [fuzz.ratio(s1, s2), self.is_equal(s1, s2), self.chars_jaccard(s1, s2)]
+    @staticmethod
+    def predict_batch(batch: List[List[float]]) -> List[Tuple[float, float]]:
+        """Takes batch of features, returns batch of predictions"""
+        return CompareByLanguageCatBoostTitle._model.predict_proba(batch)
 
-    def __eq__(self, other: TitleBase) -> bool:
-        if len(self.names["russian"]) < 1 or len(self.names["english"]) < 1 \
-                or len(other.names["russian"]) < 1 or len(other.names["english"]) < 1:
-            return 0
-        r_name_1, en_name_1 = self.names["russian"][0], \
-                              self.names["english"][0]
-        r_name_2, en_name_2 = other.names["russian"][0], \
-                              other.names["english"][0]
+    def __init__(self, names: list, meta=None):
+        super().__init__(names, meta)
 
-        return model.predict([*self._compare_strings(r_name_1, r_name_2),
-                                   *self._compare_strings(en_name_1, en_name_2)])
+    def make_features(self, other: CompareByLanguageTitle) -> List[float]:
+        """Creates features for pairs of same language names of two titles"""
+        features = []
+        for lang in ['russian', 'english']:
+            if len(self.names[lang]) and len(other.names[lang]):
+                s1, s2 = self.names[lang][0], other.names[lang][0]
+                features_lang = [fuzz.ratio(s1, s2), self.is_equal(s1, s2), self.chars_jaccard(s1, s2)]
+            else:
+                features_lang = [-1, -1, -1]
+            features += features_lang
+        return features
 
     @staticmethod
     def is_equal(s1, s2) -> int:

@@ -2,14 +2,23 @@ import sys
 import pandas as pd
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-from entities import CompareByLanguageFuzzyTitle, CompareByLanguageNaiveTitle,\
-    CompareJustFuzzyTitle,  CompareJustNaiveTitle,CompareByLanguageCatBoostTitle,\
-    FirstMatcher, FullMatcher
+from entities.titles import (
+    CompareByLanguageFuzzyTitle,
+    CompareByLanguageNaiveTitle,
+    CompareJustFuzzyTitle,
+    CompareJustNaiveTitle,
+    CompareByLanguageCatBoostTitle
+)
+from entities.matchers import (
+    FirstMatcher,
+    FullMatcher,
+    CatboostFullMatcher
+)
 from multiprocessing import Pool, cpu_count
 from yamlparams.utils import Hparam
 
 
-TitleEnity =  CompareByLanguageCatBoostTitle
+TitleEnity = CompareJustFuzzyTitle
 MatcherEntity = FullMatcher
 
 
@@ -56,7 +65,7 @@ def match_mangas(source_df: pd.DataFrame,
             source_df.loc[i, f'{target_df_name}_id'] = matched[0].get_index()
 
         elif len(matched) > 1:
-            for item in matched:
+           for item in matched:
                 source_df.loc[i, f'{target_df_name}_id'] = item.get_index()
 
         q_matches.append(len(matched))
