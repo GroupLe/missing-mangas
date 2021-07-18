@@ -36,7 +36,7 @@ class ReprezentData:
             plt.show()
 
     @staticmethod
-    def add_metrics_to_csv(metrics: dict, path: str) -> pd.DataFrame:
+    def add_metrics_to_csv(metrics: dict, path: str) -> None:
         df = pd.DataFrame(metrics, index=[0])
         old_df = pd.read_csv(path)
         result_df = pd.concat([old_df, df], ignore_index=True)
