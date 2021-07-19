@@ -29,6 +29,16 @@ class TitleBase:
         except (KeyError, AttributeError):
             return None
 
+    @staticmethod
+    def check_names(Title_first, other):
+        for Title_second in other:
+            if pd.isna(Title_second):
+                return False
+            for name in Title_second.names:
+                if name not in Title_first.names:
+                    return False
+        return True
+
 
 class CompareByLanguageTitle(TitleBase):
 
@@ -68,6 +78,17 @@ class CompareByLanguageTitle(TitleBase):
                     if self._compare_strings(name1, name2):
                         eqs += 1
         return eqs
+
+    @staticmethod
+    def check_names(Title_first, other):
+        for Title_second in other:
+            if pd.isna(Title_second):
+                return False
+            for lang in Title_first.names:
+                for name in Title_second.names[lang]:
+                    if name not in Title_first.names[lang]:
+                        return False
+        return True
 
 
 class CompareJustTitle(TitleBase):

@@ -91,7 +91,7 @@ if __name__ == '__main__':
                                     config.target_df.name,
                                     config.source_df.name_cols)
     res_df = res_soure_target['source_df']
-    res_df.to_csv(config.result.path, sep=';')
+    res_df.to_csv(config.result.path, sep=';', index = False)
 
     plt.hist(res_soure_target['q_matches'], bins=100)
     plt.savefig(config.result.hist_path)

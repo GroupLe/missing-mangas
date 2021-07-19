@@ -1,6 +1,5 @@
 from typing import List
 from .titles import TitleBase, CompareByLanguageCatBoostTitle
-from tqdm import tqdm
 import numpy as np
 
 
@@ -50,7 +49,7 @@ class FirstMatcher(Matcher):
         self.titles = titles
 
     def find_matches(self, gtitle):
-        for j, mtitle in tqdm(enumerate(self.titles)):
+        for j, mtitle in enumerate(self.titles):
             if mtitle == gtitle:
                 return [mtitle]
         return []

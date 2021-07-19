@@ -1,0 +1,16 @@
+target_df:
+  path: './data/raw/validate/first_test_set.csv'
+  name_cols: ['g_name', 'g_eng_name']
+  name: 'name'
+  separator: ';'
+
+source_df:
+  path: 'data/raw/validate/second_test_set.csv'
+  name_cols: ['r_rus_name', 'r_en_name']
+  separator: ';'
+
+validate_df:
+  path: 'data/raw/validate/validate_labels.csv'
+  separator: ';'
+
+
