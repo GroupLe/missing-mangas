@@ -30,12 +30,12 @@ class TitleBase:
             return None
 
     @staticmethod
-    def check_names(Title_first, other):
-        for Title_second in other:
-            if pd.isna(Title_second):
+    def validate_titles(validation_title, matched_titles):
+        for matched_title in matched_titles:
+            if pd.isna(matched_title):
                 return False
-            for name in Title_second.names:
-                if name not in Title_first.names:
+            for name in matched_title.names:
+                if name not in validation_title.names:
                     return False
         return True
 
@@ -80,13 +80,13 @@ class CompareByLanguageTitle(TitleBase):
         return eqs
 
     @staticmethod
-    def check_names(Title_first, other):
-        for Title_second in other:
-            if pd.isna(Title_second):
+    def validate_titles(validation_title, matched_titles):
+        for matched_title in matched_titles:
+            if pd.isna(matched_title):
                 return False
-            for lang in Title_first.names:
-                for name in Title_second.names[lang]:
-                    if name not in Title_first.names[lang]:
+            for lang in matched_title.names:
+                for name in matched_title.names[lang]:
+                    if name not in validation_title.names[lang]:
                         return False
         return True
 
@@ -96,7 +96,7 @@ class CompareJustTitle(TitleBase):
         self.names = list(map(self._clear, set(str(name) for name in names)))
         self.meta = meta
 
-    def _clear(self, s:str) -> str:
+    def _clear(self, s: str) -> str:
         s = ''.join(list(filter(lambda c: c.isalpha() or c.isdigit() or c == ' ', s)))
         s = s.lower()
         return s
