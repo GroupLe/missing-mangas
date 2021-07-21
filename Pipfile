@@ -11,6 +11,8 @@ fuzzywuzzy = "*"
 yamlparams = "*"
 pyyaml = "*"
 python-levenshtein = "*"
+sklearn = "*"
+ipython = "*"
 
 [dev-packages]
 
