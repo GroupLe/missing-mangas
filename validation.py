@@ -19,61 +19,48 @@ from entities.matchers import (
 
 from entities.metrics import (
     BinaryValidator,
-    ReprezentData
+    DataRepresenter
 )
 
 from multiprocessing import Pool, cpu_count
 from yamlparams.utils import Hparam
 
-TitleEntitys = {"CompareByLanguageCatBoostTitle": CompareByLanguageCatBoostTitle,
-                "CompareByLanguageFuzzyTitle": CompareByLanguageFuzzyTitle,
-               "CompareJustFuzzyTitle": CompareJustFuzzyTitle,
-               "CompareByLanguageNaiveTitle": CompareByLanguageNaiveTitle,
-               "CompareJustFuzzyTitle": CompareJustFuzzyTitle
-               }
+TITLES = [CompareByLanguageCatBoostTitle,
+          CompareByLanguageFuzzyTitle,
+          CompareByLanguageNaiveTitle,
+          CompareJustFuzzyTitle,
+          CompareJustNaiveTitle
+          ]
 
-MatcherEntitys = {"CatboostFullMatcher": CatboostFullMatcher,
-                  "FirstMatcher": FirstMatcher,
-                  "FullMatcher": FullMatcher
-                  }
+MATCHERS = [CatboostFullMatcher,
+            FirstMatcher,
+            FullMatcher
+            ]
 
 
+def match_mangas(source_df: pd.DataFrame, target_df: pd.DataFrame,
+                 target_df_name_columns: list, source_df_name_columns: list,
+                 title: Callable, matcher: Callable):
 
-def match_mangas(source_df: pd.DataFrame,
-                 target_df: pd.DataFrame,
-                 target_df_name_columns: list,
-                 target_df_name: str,
-                 source_df_name_columns: list,
-                 labels: list,
-                 TitleEntity: Callable,
-                 MatcherEntity: Callable):
-
-    # create manga titles
+    # create manga TITLES
     source_manga_names = list(
         source_df[source_df_name_columns].to_records(index=False))
     ids = source_df.index.tolist()
 
-    gtitles = [TitleEntity(list(source_manga_names[i]),
-                          meta={'index': ids[i]})
+    gtitles = [title(list(source_manga_names[i]), meta={'index': ids[i]})
                for i in range(len(source_manga_names))]
 
     target_manga_names = list(
         target_df[target_df_name_columns].to_records(index=False))
 
     ids = target_df.index.tolist()
-    mtitles = [TitleEntity(list(target_manga_names[i]),
-                          meta={'index': ids[i]})
+    mtitles = [title(list(target_manga_names[i]), meta={'index': ids[i]})
                for i in range(len(target_manga_names))]
 
-    source_df.loc[:, f'{target_df_name}_id'] = None
-
-    k = -1
     with Pool(cpu_count() - 1) as pool:
-        matcher = MatcherEntity(mtitles)
-        match_res = list(map(TitleEntity.check_names, gtitles,list(pool.imap(matcher.find_matches,
-                                        gtitles[:k]))))
+        match_res = list(pool.imap(matcher(mtitles).find_matches, gtitles[:-1]))
+    match_res = list(map(title.validate_titles, gtitles, match_res))
     return match_res
-
 
 
 if __name__ == '__main__':
@@ -85,30 +72,29 @@ if __name__ == '__main__':
         sep = ','
     target_df = pd.read_csv(config.target_df.path, sep=sep)
     source_df = pd.read_csv(config.source_df.path, sep=';')
-    labels = list(map(lambda x:x[0],
-                        pd.read_csv(config.validate_df.path,
-                                    sep=';').to_records(index = False)))
+    labels = list(map(lambda x: x[0],
+                      pd.read_csv(config.validate_df.path,
+                      sep=';').to_records(index=False)))
 
-    for name_title in tqdm(TitleEntitys):
-        for name_matcher in MatcherEntitys:
-
-            predict_model = match_mangas(source_df,
-                                            target_df,
-                                            config.target_df.name_cols,
-                                            config.target_df.name,
-                                            config.source_df.name_cols,
-                                            labels, TitleEntitys[name_title],
-                                            MatcherEntitys[name_matcher])
+    for title in tqdm(TITLES):
+        for matcher in MATCHERS:
+            titles_name = title.__name__
+            matchers_name = matcher.__name__
+            
+            predict_model = match_mangas(source_df, target_df,
+                                         config.target_df.name_cols,
+                                         config.source_df.name_cols,
+                                         title, matcher)
 
             metrics = BinaryValidator.validate(labels[:len(predict_model)],
                                                predict_model)
 
             """Uncomment this if you still don't have this csv"""
-            ReprezentData.create_csv(metrics,
-                                     'data/models_results/' + name_title + name_matcher + ".csv")
+            # DataRepresenter.create_csv(metrics,
+            #                            'data/models_results/' + titles_name + matchers_name + ".csv")
+            DataRepresenter.add_metrics_to_csv(metrics,
+                                               'data/models_results/' + titles_name + matchers_name + ".csv")
 
-            if name_title == "CompareByLanguageCatBoostTitle":
-                MatcherEntitys.pop("CatboostFullMatcher")
+            if titles_name == "CompareByLanguageCatBoostTitle":
+                MATCHERS.remove(CatboostFullMatcher)
                 break
-
-
