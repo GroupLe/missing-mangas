@@ -19,7 +19,7 @@ class BinaryValidator:
         return metrics
 
 
-class ReprezentData:
+class DataRepresenter:
 
     @staticmethod
     def create_csv(metrics: dict, path: str) -> None:
@@ -45,4 +45,3 @@ class ReprezentData:
     @staticmethod
     def view_df(path: str) -> None:
         display(pd.read_csv(path))
-
