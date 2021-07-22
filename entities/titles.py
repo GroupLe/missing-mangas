@@ -30,7 +30,8 @@ class TitleBase:
             return None
 
     @staticmethod
-    def validate_titles(validation_title, matched_titles):
+    def validate_titles(validation_title: "TitleBase",
+                        matched_titles: list["TitleBase"]) -> bool:
         for matched_title in matched_titles:
             if pd.isna(matched_title):
                 return False
@@ -80,7 +81,8 @@ class CompareByLanguageTitle(TitleBase):
         return eqs
 
     @staticmethod
-    def validate_titles(validation_title, matched_titles):
+    def validate_titles(validation_title: "CompareByLanguageTitle",
+                        matched_titles: list["CompareByLanguageTitle"]) -> bool:
         for matched_title in matched_titles:
             if pd.isna(matched_title):
                 return False
