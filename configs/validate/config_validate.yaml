@@ -1,0 +1,15 @@
+target_df:
+  path: './data/raw/validate/remanga_validate.csv'
+  name_cols: ['rus_name', 'en_name']
+  separator: ';'
+
+source_df:
+  path: 'data/raw/validate/gmanga_validate.csv'
+  name_cols: ['rus_name', 'en_name']
+  separator: ';'
+
+
+validate_df:
+  path: 'data/raw/validate/validate_labels.csv'
+  separator: ';'
+

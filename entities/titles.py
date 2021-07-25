@@ -29,6 +29,17 @@ class TitleBase:
         except (KeyError, AttributeError):
             return None
 
+    @staticmethod
+    def validate_titles(validation_title: "TitleBase",
+                        matched_titles: list["TitleBase"]) -> bool:
+        for matched_title in matched_titles:
+            if pd.isna(matched_title):
+                return False
+            for name in matched_title.names:
+                if name not in validation_title.names:
+                    return False
+        return True
+
 
 class CompareByLanguageTitle(TitleBase):
 
@@ -69,13 +80,25 @@ class CompareByLanguageTitle(TitleBase):
                         eqs += 1
         return eqs
 
+    @staticmethod
+    def validate_titles(validation_title: "CompareByLanguageTitle",
+                        matched_titles: list["CompareByLanguageTitle"]) -> bool:
+        for matched_title in matched_titles:
+            if pd.isna(matched_title):
+                return False
+            for lang in matched_title.names:
+                for name in matched_title.names[lang]:
+                    if name not in validation_title.names[lang]:
+                        return False
+        return True
+
 
 class CompareJustTitle(TitleBase):
     def __init__(self, names: list, meta=None):
         self.names = list(map(self._clear, set(str(name) for name in names)))
         self.meta = meta
 
-    def _clear(self, s:str) -> str:
+    def _clear(self, s: str) -> str:
         s = ''.join(list(filter(lambda c: c.isalpha() or c.isdigit() or c == ' ', s)))
         s = s.lower()
         return s
